@@ -1,0 +1,124 @@
+menu "BluControl SDK Configuration"
+
+config BLUCONTROL_MODE_LENGTH
+    int "Modes count"
+    range 1 10
+    default 1
+    help
+        Set the length of modes. All mode needs to be present on the ESP32's flash.
+
+config BLUCONTROL_MODE1_LED_GPIO
+    int "Mode 1 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 1 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE2_LED_GPIO
+    int "Mode 2 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 2 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE3_LED_GPIO
+    int "Mode 3 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 2
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 3 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE4_LED_GPIO
+    int "Mode 4 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 3
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 4 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE5_LED_GPIO
+    int "Mode 5 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 4
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 5 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE6_LED_GPIO
+    int "Mode 6 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 5
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 6 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE7_LED_GPIO
+    int "Mode 7 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 6
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 7 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE8_LED_GPIO
+    int "Mode 8 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 7
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 8 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE9_LED_GPIO
+    int "Mode 9 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 8
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 9 is active. -1 if no LED is used.
+
+config BLUCONTROL_MODE10_LED_GPIO
+    int "Mode 10 LED GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 9
+    default -1
+    help
+        GPIO Number for the LED to indicate that Mode 10 is active. -1 if no LED is used.
+
+config BLUCONTROL_SECONDS_FOR_SWITCH_MODE
+    int "Seconds to switch the mode"
+    depends on BLUCONTROL_MODE_LENGTH > 1
+    range 0 60
+    default 5
+    help
+        Sets seconds that the players has to hold the defined buttons to switch the mode.
+
+config BLUCONTROL_SWITCH_BUTTONS_LENGTH
+    int "Switch buttons length"
+    depends on BLUCONTROL_MODE_LENGTH > 1
+    range 1 4
+    default 3
+    help
+        Sets the numbers of buttons used to switch the mode. All of those buttons have to be pressed ir order to change the mode
+
+config BLUCONTROL_SWITCH_BUTTON1_GPIO
+    int "Switch Button 1 GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1
+    default -1
+    help
+        GPIO Number for the Button 1 to switch the mode
+
+config BLUCONTROL_SWITCH_BUTTON2_GPIO
+    int "Switch Button 2 GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1 && BLUCONTROL_SWITCH_BUTTONS_LENGTH > 1
+    default -1
+    help
+        GPIO Number for the Button 2 to switch the mode
+
+config BLUCONTROL_SWITCH_BUTTON3_GPIO
+    int "Switch Button 3 GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1 && BLUCONTROL_SWITCH_BUTTONS_LENGTH > 2
+    default -1
+    help
+        GPIO Number for the Button 3 to switch the mode
+
+config BLUCONTROL_SWITCH_BUTTON4_GPIO
+    int "Switch Button 4 GPIO"
+    depends on BLUCONTROL_MODE_LENGTH > 1 && BLUCONTROL_SWITCH_BUTTONS_LENGTH > 3
+    default -1
+    help
+        GPIO Number for the Button 4 to switch the mode
+
+endmenu
