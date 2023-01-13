@@ -59,6 +59,8 @@ bool ignored_switch_buttons[SWITCH_BUTTONS_LENGTH] =
 #endif
 };
 
+void switch_mode_task();
+
 int currentMode = -1;
 
 void blucontrol_mode_init(void)
@@ -122,7 +124,14 @@ void blucontrol_handle_buttons(void)
     }
 }
 
+TaskHandle_t switchModeTaskHandle = NULL;
 void blucontrol_switch_mode(void)
+{
+    xTaskCreatePinnedToCore(switch_mode_task, "BLU_SWITCH_MODE", 4096, NULL, tskIDLE_PRIORITY, &switchModeTaskHandle, 1);
+    configASSERT(switchModeTaskHandle);
+}
+
+void switch_mode_task(void)
 {
     currentMode++;
     if (currentMode >= MODE_LENGTH)
