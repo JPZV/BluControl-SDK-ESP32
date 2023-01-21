@@ -59,7 +59,9 @@ bool ignored_switch_buttons[SWITCH_BUTTONS_LENGTH] =
 #endif
 };
 
-void switch_mode_task();
+bool blucontrol_handle_buttons_with_ota(bool with_ota);
+void switch_mode_task(void *obj);
+void switch_ota_task(void *obj);
 
 int currentMode = -1;
 
@@ -77,10 +79,15 @@ void blucontrol_mode_init(void)
         gpio_set_direction(mode_leds[i], GPIO_MODE_OUTPUT);
         gpio_set_level(mode_leds[i], i == currentMode);
     }
+
+    while(blucontrol_handle_buttons_with_ota(true))
+    {
+        vTaskDelay(0.2 / portTICK_PERIOD_MS);
+    }
 }
 
 uint32_t last_tick = 0;
-void blucontrol_handle_buttons(void)
+bool blucontrol_handle_buttons_with_ota(bool with_ota)
 {
     bool all_pressed = true;
     for (int i = 0; i < SWITCH_BUTTONS_LENGTH; i++)
@@ -115,13 +122,27 @@ void blucontrol_handle_buttons(void)
         else if (xTaskGetTickCount() - last_tick >= SECONDS_TO_SWITCH * 1000)
         {
             last_tick = 0;
-            blucontrol_switch_mode();
+            if (with_ota)
+            {
+                blucontrol_switch_ota_mode();
+            }
+            else
+            {
+                blucontrol_switch_mode();
+            }
         }
     }
     else
     {
         last_tick = 0;
     }
+
+    return all_pressed;
+}
+
+bool blucontrol_handle_buttons(void)
+{
+    return blucontrol_handle_buttons_with_ota(false);
 }
 
 TaskHandle_t switchModeTaskHandle = NULL;
@@ -131,7 +152,7 @@ void blucontrol_switch_mode(void)
     configASSERT(switchModeTaskHandle);
 }
 
-void switch_mode_task(void)
+void switch_mode_task(void *obj)
 {
     currentMode++;
     if (currentMode >= MODE_LENGTH)
@@ -141,15 +162,15 @@ void switch_mode_task(void)
 
     const esp_partition_t *partition = esp_partition_find_first(
         ESP_PARTITION_TYPE_APP,
-        ESP_PARTITION_SUBTYPE_APP_OTA_MIN + currentMode,
+        ESP_PARTITION_SUBTYPE_APP_OTA_1 + currentMode,
         NULL);
-    printf("Switching to OTA %d\n", ESP_PARTITION_SUBTYPE_APP_OTA_MIN + currentMode);
+    printf("Switching to App %d\n", currentMode);
     if (partition != NULL)
     {
         esp_err_t err = esp_ota_set_boot_partition(partition);
         if (err != ESP_OK)
         {
-            printf("%s: esp_ota_set_boot_partition failed (%d).\n", __func__, err);
+            printf("%s: esp_ota_set_boot_partition failed (%s).\n", __func__, esp_err_to_name(err));
             abort();
             return;
         }
@@ -157,6 +178,37 @@ void switch_mode_task(void)
     }
     else
     {
-        printf("%s: No partition found for OTA %d.\n", __func__, currentMode);
+        printf("%s: No partition found for App %d.\n", __func__, currentMode);
+    }
+}
+
+TaskHandle_t switchOTATaskHandle = NULL;
+void blucontrol_switch_ota_mode(void)
+{
+    xTaskCreatePinnedToCore(switch_ota_task, "BLU_SWITCH_OTA_MODE", 4096, NULL, tskIDLE_PRIORITY, &switchOTATaskHandle, 1);
+    configASSERT(switchOTATaskHandle);
+}
+
+void switch_ota_task(void *obj)
+{
+    const esp_partition_t *partition = esp_partition_find_first(
+        ESP_PARTITION_TYPE_APP,
+        ESP_PARTITION_SUBTYPE_APP_OTA_0,
+        NULL);
+    printf("Switching to OTA\n");
+    if (partition != NULL)
+    {
+        esp_err_t err = esp_ota_set_boot_partition(partition);
+        if (err != ESP_OK)
+        {
+            printf("%s: esp_ota_set_boot_partition failed (%s).\n", __func__, esp_err_to_name(err));
+            abort();
+            return;
+        }
+        esp_restart();
+    }
+    else
+    {
+        printf("%s: No partition found for OTA.\n", __func__);
     }
 }

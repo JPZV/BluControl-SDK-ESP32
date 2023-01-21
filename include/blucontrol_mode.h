@@ -89,7 +89,8 @@
 #endif
 
 void blucontrol_mode_init(void);
-void blucontrol_handle_buttons(void);
+bool blucontrol_handle_buttons(void);
 void blucontrol_switch_mode(void);
+void blucontrol_switch_ota_mode(void);
 
 #endif
