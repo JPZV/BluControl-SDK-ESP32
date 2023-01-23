@@ -1,5 +1,7 @@
 #include "blucontrol_mode.h"
 
+#define LOG_TAG "BLU_MODE"
+
 int mode_leds[MODE_LENGTH] =
 {
     MODE1_LED_PIN,
@@ -96,7 +98,7 @@ bool blucontrol_handle_buttons_with_ota(bool with_ota)
         {
             if (!ignored_switch_buttons[i])
             {
-                printf("BluControl WARN: Switch Button %d has a non-positive value. Ignoring this button.\n", i + 1);
+                ESP_LOGW(LOG_TAG, "Switch Button %d has a non-positive value. Ignoring this button.", i + 1);
                 ignored_switch_buttons[i] = true;
             }
             if (SWITCH_BUTTONS_LENGTH == 1)
@@ -164,13 +166,13 @@ void switch_mode_task(void *obj)
         ESP_PARTITION_TYPE_APP,
         ESP_PARTITION_SUBTYPE_APP_OTA_1 + currentMode,
         NULL);
-    printf("Switching to App %d\n", currentMode);
+    ESP_LOGI(LOG_TAG, "Switching to App %d", currentMode);
     if (partition != NULL)
     {
         esp_err_t err = esp_ota_set_boot_partition(partition);
         if (err != ESP_OK)
         {
-            printf("%s: esp_ota_set_boot_partition failed (%s).\n", __func__, esp_err_to_name(err));
+            ESP_LOGE(LOG_TAG, "%s: esp_ota_set_boot_partition failed (%s).", __func__, esp_err_to_name(err));
             abort();
             return;
         }
@@ -178,7 +180,7 @@ void switch_mode_task(void *obj)
     }
     else
     {
-        printf("%s: No partition found for App %d.\n", __func__, currentMode);
+        ESP_LOGE(LOG_TAG, "No partition found for App %d.", currentMode);
     }
 }
 
@@ -195,13 +197,13 @@ void switch_ota_task(void *obj)
         ESP_PARTITION_TYPE_APP,
         ESP_PARTITION_SUBTYPE_APP_OTA_0,
         NULL);
-    printf("Switching to OTA\n");
+    ESP_LOGI(LOG_TAG, "Switching to OTA");
     if (partition != NULL)
     {
         esp_err_t err = esp_ota_set_boot_partition(partition);
         if (err != ESP_OK)
         {
-            printf("%s: esp_ota_set_boot_partition failed (%s).\n", __func__, esp_err_to_name(err));
+            ESP_LOGE(LOG_TAG, "%s: esp_ota_set_boot_partition failed (%s).", __func__, esp_err_to_name(err));
             abort();
             return;
         }
@@ -209,6 +211,6 @@ void switch_ota_task(void *obj)
     }
     else
     {
-        printf("%s: No partition found for OTA.\n", __func__);
+        ESP_LOGE(LOG_TAG, "No partition found for OTA.");
     }
 }
