@@ -62,15 +62,19 @@ bool ignored_switch_buttons[SWITCH_BUTTONS_LENGTH] =
 };
 
 bool blucontrol_handle_buttons_with_ota(bool with_ota);
+void buttons_loop(void *obj);
 void switch_mode_task(void *obj);
 void switch_ota_task(void *obj);
 
 int currentMode = -1;
+TaskHandle_t buttonsLoopTaskHandle = NULL;
+bool has_ota = true;
 
-void blucontrol_mode_init(void)
+void blucontrol_mode_init(bool _has_ota)
 {
+    has_ota = _has_ota;
     const esp_partition_t* currentPartition = esp_ota_get_boot_partition();
-    currentMode = currentPartition->subtype - ESP_PARTITION_SUBTYPE_APP_OTA_MIN;
+    currentMode =  currentPartition->subtype - (ESP_PARTITION_SUBTYPE_APP_OTA_MIN + has_ota);
     for (int i = 0; i < MODE_LENGTH; i++)
     {
         if (mode_leds[i] < 0)
@@ -86,6 +90,9 @@ void blucontrol_mode_init(void)
     {
         vTaskDelay(0.2 / portTICK_PERIOD_MS);
     }
+
+    xTaskCreatePinnedToCore(buttons_loop, "BLU_MODE_LOOP", 1024, NULL, tskIDLE_PRIORITY, &buttonsLoopTaskHandle, 1);
+    configASSERT(buttonsLoopTaskHandle);
 }
 
 uint32_t last_tick = 0;
@@ -154,6 +161,22 @@ void blucontrol_switch_mode(void)
     configASSERT(switchModeTaskHandle);
 }
 
+TaskHandle_t switchOTATaskHandle = NULL;
+void blucontrol_switch_ota_mode(void)
+{
+    xTaskCreatePinnedToCore(switch_ota_task, "BLU_SWITCH_OTA_MODE", 4096, NULL, tskIDLE_PRIORITY, &switchOTATaskHandle, 1);
+    configASSERT(switchOTATaskHandle);
+}
+
+void buttons_loop(void *obj)
+{
+    while(true)
+    {
+        blucontrol_handle_buttons();
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+}
+
 void switch_mode_task(void *obj)
 {
     currentMode++;
@@ -164,7 +187,7 @@ void switch_mode_task(void *obj)
 
     const esp_partition_t *partition = esp_partition_find_first(
         ESP_PARTITION_TYPE_APP,
-        ESP_PARTITION_SUBTYPE_APP_OTA_1 + currentMode,
+        ESP_PARTITION_SUBTYPE_APP_OTA_MIN + has_ota + currentMode,
         NULL);
     ESP_LOGI(LOG_TAG, "Switching to App %d", currentMode);
     if (partition != NULL)
@@ -184,15 +207,14 @@ void switch_mode_task(void *obj)
     }
 }
 
-TaskHandle_t switchOTATaskHandle = NULL;
-void blucontrol_switch_ota_mode(void)
-{
-    xTaskCreatePinnedToCore(switch_ota_task, "BLU_SWITCH_OTA_MODE", 4096, NULL, tskIDLE_PRIORITY, &switchOTATaskHandle, 1);
-    configASSERT(switchOTATaskHandle);
-}
-
 void switch_ota_task(void *obj)
 {
+    if (!has_ota)
+    {
+        ESP_LOGE(LOG_TAG, "This project doesn't have OTA");
+        return;
+    }
+
     const esp_partition_t *partition = esp_partition_find_first(
         ESP_PARTITION_TYPE_APP,
         ESP_PARTITION_SUBTYPE_APP_OTA_0,

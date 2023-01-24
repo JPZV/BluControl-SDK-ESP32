@@ -89,7 +89,7 @@
     #define SWITCH_BUTTON4_PIN CONFIG_BLUCONTROL_SWITCH_BUTTON4_GPIO
 #endif
 
-void blucontrol_mode_init(void);
+void blucontrol_mode_init(bool _has_ota);
 bool blucontrol_handle_buttons(void);
 void blucontrol_switch_mode(void);
 void blucontrol_switch_ota_mode(void);
