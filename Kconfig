@@ -7,6 +7,20 @@ config BLUCONTROL_MODE_LENGTH
     help
         Set the length of modes. All mode needs to be present on the ESP32's flash.
 
+choice BLUCONTROL_LEDS_MODE
+    prompt "LEDs GPIO mode"
+    default BLUCONTROL_LEDS_MODE_HIGH
+    help
+        Select how the LEDs have to turn on.
+
+    config BLUCONTROL_LEDS_MODE_HIGH
+        depends on !BLUCONTROL_ENERGY_MODE_SOFTWARE
+        bool "On HIGH value (GPIO gives 3.3v to the LED)"
+
+    config BLUCONTROL_LEDS_MODE_LOW
+        bool "On LOW value (GPIO acts like GND)"
+endchoice
+
 config BLUCONTROL_MODE1_LED_GPIO
     int "Mode 1 LED GPIO"
     depends on BLUCONTROL_MODE_LENGTH > 1

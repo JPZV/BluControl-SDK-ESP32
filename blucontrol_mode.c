@@ -83,7 +83,7 @@ void blucontrol_mode_init(bool _has_ota)
         }
         gpio_reset_pin(mode_leds[i]);
         gpio_set_direction(mode_leds[i], GPIO_MODE_OUTPUT);
-        gpio_set_level(mode_leds[i], i == currentMode);
+        gpio_set_level(mode_leds[i], i == currentMode ? LED_POWER_ON : !LED_POWER_ON);
     }
 
     while(blucontrol_handle_buttons_with_ota(true))
