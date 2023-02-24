@@ -95,6 +95,13 @@
     #define LED_POWER_ON 0
 #endif
 
+// Misc
+#ifdef CONFIG_BLUCONTROL_BUTTONS_PRESS_STATE_HIGH
+    #define BUTTONS_PRESS_STATE 1
+#else
+    #define BUTTONS_PRESS_STATE 0
+#endif
+
 void blucontrol_mode_init(bool _has_ota);
 bool blucontrol_handle_buttons(void);
 void blucontrol_switch_mode(void);

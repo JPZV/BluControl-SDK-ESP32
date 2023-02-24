@@ -115,7 +115,7 @@ bool blucontrol_handle_buttons_with_ota(bool with_ota)
             continue;
         }
 
-        if (gpio_get_level(switch_buttons[i]))
+        if (gpio_get_level(switch_buttons[i]) != BUTTONS_PRESS_STATE)
         {
             all_pressed = false;
             break;

@@ -1,5 +1,18 @@
 menu "BluControl SDK Configuration"
 
+    choice BLUCONTROL_BUTTONS_PRESS_STATE
+        prompt "State when pressing buttons"
+        default BLUCONTROL_BUTTONS_PRESS_STATE_LOW
+        help
+            Select whether the buttons are pressed when in LOW (Ground) or HIGH (3.3)
+
+        config BLUCONTROL_BUTTONS_PRESS_STATE_LOW
+            bool "LOW State"
+
+        config BLUCONTROL_BUTTONS_PRESS_STATE_HIGH
+            bool "HIGH State"
+    endchoice
+
     config BLUCONTROL_MODE_LENGTH
         int "Modes count"
         range 1 10
