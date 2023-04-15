@@ -86,7 +86,7 @@ void blucontrol_mode_init(bool _has_ota)
         gpio_set_level(mode_leds[i], i == currentMode ? LED_POWER_ON : !LED_POWER_ON);
     }
 
-    while(blucontrol_handle_buttons_with_ota(true))
+    while(has_ota && blucontrol_handle_buttons_with_ota(true))
     {
         vTaskDelay(0.2 / portTICK_PERIOD_MS);
     }
@@ -164,7 +164,7 @@ void blucontrol_switch_mode(void)
 TaskHandle_t switchOTATaskHandle = NULL;
 void blucontrol_switch_ota_mode(void)
 {
-    xTaskCreatePinnedToCore(switch_ota_task, "BLU_SWITCH_OTA_MODE", 4096, NULL, tskIDLE_PRIORITY, &switchOTATaskHandle, 1);
+    xTaskCreatePinnedToCore(switch_ota_task, "BLU_SWITCH_OTA", 4096, NULL, tskIDLE_PRIORITY, &switchOTATaskHandle, 1);
     configASSERT(switchOTATaskHandle);
 }
 
@@ -212,6 +212,7 @@ void switch_ota_task(void *obj)
     if (!has_ota)
     {
         ESP_LOGE(LOG_TAG, "This project doesn't have OTA");
+        vTaskDelete(NULL);
         return;
     }
 
